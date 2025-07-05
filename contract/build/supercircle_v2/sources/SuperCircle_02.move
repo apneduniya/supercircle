@@ -1,4 +1,4 @@
-module supercircle_addr::SuperCircle_01 {
+module supercircle_addr::SuperCircle_02 {
     use std::signer;
     use std::vector;
     use std::string;
@@ -24,13 +24,14 @@ module supercircle_addr::SuperCircle_01 {
     const STATUS_ACTIVE: u8 = 1;
     const STATUS_RESOLVED: u8 = 2;
 
-    const VAULT_SEED: vector<u8> = b"vault";
+    const VAULT_SEED: vector<u8> = b"vault_v2";
     const AI_SIGNER_ADDRESS: address = @0xDEADBEEF; // TODO: change to actual AI signer address
 
     /// Supporter structure holds the address of the supporter and the amount of stake they have
     struct Supporter has copy, drop, store {
         addr: address,
         amount: u64, // amount staked
+        joined_at: u64, // timestamp
     }
 
     /// Circle structure
@@ -40,6 +41,7 @@ module supercircle_addr::SuperCircle_01 {
         opponent: option::Option<address>,
         description: string::String,
         deadline: u64, // timestamp
+        created_at: u64, // timestamp
         creator_stake: u64,
         opponent_stake: u64,
         creator_supporter_pct: u8, // percentage of prize money for creator's supporters
@@ -131,6 +133,7 @@ module supercircle_addr::SuperCircle_01 {
             opponent: option::none<address>(),
             description,
             deadline,
+            created_at: timestamp::now_seconds(),
             creator_stake,
             opponent_stake: 0,
             creator_supporter_pct,
@@ -240,6 +243,7 @@ module supercircle_addr::SuperCircle_01 {
                 let supporter_struct = Supporter {
                     addr: supporter_addr,
                     amount,
+                    joined_at: timestamp::now_seconds(),
                 };
                 
                 if (side == 0) {
@@ -381,7 +385,7 @@ module supercircle_addr::SuperCircle_01 {
     ) acquires CircleBook, Vault {
         // Only AI signer can call
         let ai_addr = signer::address_of(ai_signer);
-        assert!(ai_addr == AI_SIGNER_ADDRESS, ERR_NOT_AI_SIGNER);
+        assert!(ai_addr == @supercircle_addr, ERR_NOT_AI_SIGNER);
 
         let circle_book = borrow_global_mut<CircleBook>(@supercircle_addr);
         
@@ -718,7 +722,7 @@ module supercircle_addr::SuperCircle_01 {
         coin::destroy_mint_cap(mint_cap);
     }
 
-    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr, creator = @0x100, opponent = @0x200, ai_signer = @0xDEADBEEF)]
+    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr, creator = @0x100, opponent = @0x200, ai_signer = @supercircle_addr)]
     public fun test_resolve_circle_logic(
         aptos_framework: &signer, 
         supercircle_account: &signer, 

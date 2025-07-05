@@ -45,6 +45,8 @@ async function main() {
                 console.log(`   ${index + 1}. ID: ${circle.id}`);
                 console.log(`      Creator: ${circle.creator}`);
                 console.log(`      Description: ${circle.description}`);
+                console.log(`      Created: ${contractService.formatTimestamp(circle.created_at)} (${contractService.getTimeAgo(circle.created_at)})`);
+                console.log(`      Deadline: ${contractService.formatTimestamp(circle.deadline)}`);
                 console.log(`      Status: ${circle.status === 0 ? 'Pending' : circle.status === 1 ? 'Active' : 'Resolved'}`);
                 console.log(`      Prize Pool: ${circle.prize_pool} APT`);
                 console.log(`      Opponent: ${circle.opponent || 'None'}`);

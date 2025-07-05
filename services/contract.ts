@@ -10,6 +10,7 @@ export interface Circle {
     opponent: string | null;
     description: string;
     deadline: number;
+    created_at: number;
     creator_stake: number;
     opponent_stake: number;
     creator_supporter_pct: number;
@@ -25,6 +26,7 @@ export interface Circle {
 export interface Supporter {
     addr: string;
     amount: number;
+    joined_at: number;
 }
 
 export enum SuperCircleMethods {
@@ -298,6 +300,7 @@ export class ContractService {
                 opponent: circle.opponent && circle.opponent.vec && circle.opponent.vec.length > 0 ? circle.opponent.vec[0] : null,
                 description: circle.description,
                 deadline: parseInt(circle.deadline),
+                created_at: parseInt(circle.created_at),
                 creator_stake: parseInt(circle.creator_stake) / APT_TO_OCTA,
                 opponent_stake: parseInt(circle.opponent_stake) / APT_TO_OCTA,
                 creator_supporter_pct: parseInt(circle.creator_supporter_pct),
@@ -493,6 +496,35 @@ export class ContractService {
      */
     octaToApt(octa: number): number {
         return octa / APT_TO_OCTA;
+    }
+
+    /**
+     * Format timestamp to readable date
+     */
+    formatTimestamp(timestamp: number): string {
+        return new Date(timestamp * 1000).toLocaleString();
+    }
+
+    /**
+     * Get time ago string from timestamp
+     */
+    getTimeAgo(timestamp: number): string {
+        const now = Math.floor(Date.now() / 1000);
+        const diff = now - timestamp;
+        
+        if (diff < 60) return `${diff} seconds ago`;
+        if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+        return `${Math.floor(diff / 86400)} days ago`;
+    }
+
+    /**
+     * Check if circle is recently created (within last 24 hours)
+     */
+    isRecentlyCreated(circle: Circle): boolean {
+        const now = Math.floor(Date.now() / 1000);
+        const dayAgo = now - 86400; // 24 hours ago
+        return circle.created_at > dayAgo;
     }
 }
 
