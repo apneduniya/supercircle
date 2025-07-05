@@ -1,0 +1,9 @@
+{
+    "mcpServers": {
+      "aptos-build-mcp": {
+        "command": "npx",
+        "args": ["tsx", "/Users/thatsmeadarsh/myprograms/mcp/aptos-npm-mcp/src/server.ts"],
+        "type": "stdio"
+      }
+    }
+  }
