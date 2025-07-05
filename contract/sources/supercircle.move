@@ -571,4 +571,335 @@ module supercircle_addr::SuperCircle_01 {
         assert!(STATUS_ACTIVE == 1, 2);
         assert!(STATUS_RESOLVED == 2, 3);
     }
+
+    #[test_only]
+    use aptos_framework::aptos_coin;
+
+    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr)]
+    public fun test_create_circle_logic(aptos_framework: &signer, supercircle_account: &signer) acquires CircleBook {
+        // Step 1: Initialize the coin framework for testing
+        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
+        
+        // Step 2: Initialize our module (this creates the CircleBook resource)
+        init(supercircle_account);
+        
+        // Step 3: Register supercircle_account for APT and give it some coins
+        coin::register<AptosCoin>(supercircle_account);
+        let coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(supercircle_account), coins);
+        
+        // Step 4: Create circle (this should now work)
+        create_circle(
+            supercircle_account,
+            string::utf8(b"Test Circle"),
+            1_725_000_000,
+            25,
+            100_000
+        );
+        
+        // Step 5: Verify the circle was created correctly
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        assert!(vector::length(&circle_book.circles) == 1, 1);
+        assert!(circle_book.next_id == 1, 2);
+        
+        let circle = vector::borrow(&circle_book.circles, 0);
+        assert!(circle.id == 0, 3);
+        assert!(circle.creator == signer::address_of(supercircle_account), 4);
+        assert!(circle.prize_pool == 100_000, 5);
+        
+        // Clean up
+        coin::destroy_burn_cap(burn_cap);
+        coin::destroy_mint_cap(mint_cap);
+    }
+
+    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr, creator = @0x100, opponent = @0x200)]
+    public fun test_accept_circle_logic(
+        aptos_framework: &signer, 
+        supercircle_account: &signer, 
+        creator: &signer, 
+        opponent: &signer
+    ) acquires CircleBook {
+        // Step 1: Initialize the coin framework for testing
+        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
+        
+        // Step 2: Initialize our module
+        init(supercircle_account);
+        
+        // Step 3: Register accounts for APT and give them coins
+        coin::register<AptosCoin>(creator);
+        coin::register<AptosCoin>(opponent);
+        
+        let creator_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(creator), creator_coins);
+        
+        let opponent_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(opponent), opponent_coins);
+        
+        // Step 4: Create a circle first
+        create_circle(
+            creator,
+            string::utf8(b"Test Challenge"),
+            1_725_000_000,
+            25,
+            100_000
+        );
+        
+        // Step 5: Accept the circle
+        accept_circle(opponent, 0, 30);
+        
+        // Step 6: Verify the circle was accepted correctly
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        let circle = vector::borrow(&circle_book.circles, 0);
+        
+        assert!(option::is_some(&circle.opponent), 10);
+        assert!(*option::borrow(&circle.opponent) == signer::address_of(opponent), 11);
+        assert!(circle.opponent_stake == 50_000, 12);
+        assert!(circle.opponent_supporter_pct == 30, 13);
+        assert!(circle.status == STATUS_ACTIVE, 14);
+        
+        // Clean up
+        coin::destroy_burn_cap(burn_cap);
+        coin::destroy_mint_cap(mint_cap);
+    }
+
+    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr, creator = @0x100, opponent = @0x200, supporter = @0x300)]
+    public fun test_join_as_supporter_logic(
+        aptos_framework: &signer, 
+        supercircle_account: &signer, 
+        creator: &signer, 
+        opponent: &signer,
+        supporter: &signer
+    ) acquires CircleBook {
+        // Step 1: Initialize the coin framework for testing
+        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
+        
+        // Step 2: Initialize our module
+        init(supercircle_account);
+        
+        // Step 3: Register accounts for APT and give them coins
+        coin::register<AptosCoin>(creator);
+        coin::register<AptosCoin>(opponent);
+        coin::register<AptosCoin>(supporter);
+        
+        let creator_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(creator), creator_coins);
+        
+        let opponent_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(opponent), opponent_coins);
+        
+        let supporter_coins = coin::mint<AptosCoin>(50_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(supporter), supporter_coins);
+        
+        // Step 4: Create and accept a circle
+        create_circle(
+            creator,
+            string::utf8(b"Test Challenge"),
+            1_725_000_000,
+            25,
+            100_000
+        );
+        
+        accept_circle(opponent, 0, 30);
+        
+        // Step 5: Join as supporter for creator (side = 0)
+        join_as_supporter(supporter, 0, 0, 10_000);
+        
+        // Step 6: Verify supporter was added correctly
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        let circle = vector::borrow(&circle_book.circles, 0);
+        
+        assert!(vector::length(&circle.creator_supporters) == 1, 15);
+        let supporter_entry = vector::borrow(&circle.creator_supporters, 0);
+        assert!(supporter_entry.addr == signer::address_of(supporter), 16);
+        assert!(supporter_entry.amount == 10_000, 17);
+        
+        // Clean up
+        coin::destroy_burn_cap(burn_cap);
+        coin::destroy_mint_cap(mint_cap);
+    }
+
+    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr, creator = @0x100, opponent = @0x200, ai_signer = @0xDEADBEEF)]
+    public fun test_resolve_circle_logic(
+        aptos_framework: &signer, 
+        supercircle_account: &signer, 
+        creator: &signer, 
+        opponent: &signer,
+        ai_signer: &signer
+    ) acquires CircleBook, Vault {
+        // Step 1: Initialize the coin framework for testing
+        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
+        
+        // Step 2: Initialize our module
+        init(supercircle_account);
+        
+        // Step 3: Register accounts for APT and give them coins
+        coin::register<AptosCoin>(creator);
+        coin::register<AptosCoin>(opponent);
+        
+        let creator_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(creator), creator_coins);
+        
+        let opponent_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(opponent), opponent_coins);
+        
+        // Step 4: Create and accept a circle
+        create_circle(
+            creator,
+            string::utf8(b"Test Challenge"),
+            1_725_000_000,
+            25,
+            100_000
+        );
+        
+        accept_circle(opponent, 0, 30);
+        
+        // Step 5: Resolve the circle (creator wins)
+        resolve_circle(ai_signer, 0, signer::address_of(creator));
+        
+        // Step 6: Verify the circle was resolved correctly
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        let circle = vector::borrow(&circle_book.circles, 0);
+        
+        assert!(circle.resolved, 18);
+        assert!(circle.status == STATUS_RESOLVED, 19);
+        assert!(option::is_some(&circle.winner), 20);
+        assert!(*option::borrow(&circle.winner) == signer::address_of(creator), 21);
+        
+        // Clean up
+        coin::destroy_burn_cap(burn_cap);
+        coin::destroy_mint_cap(mint_cap);
+    }
+
+    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr, creator = @0x100, opponent = @0x200)]
+    #[expected_failure(abort_code = ERR_NOT_AI_SIGNER, location = Self)]
+    public fun test_resolve_circle_wrong_signer(
+        aptos_framework: &signer, 
+        supercircle_account: &signer, 
+        creator: &signer, 
+        opponent: &signer
+    ) acquires CircleBook, Vault {
+        // Step 1: Initialize the coin framework for testing
+        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
+        
+        // Step 2: Initialize our module
+        init(supercircle_account);
+        
+        // Step 3: Register accounts for APT and give them coins
+        coin::register<AptosCoin>(creator);
+        coin::register<AptosCoin>(opponent);
+        
+        let creator_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(creator), creator_coins);
+        
+        let opponent_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(opponent), opponent_coins);
+        
+        // Step 4: Create and accept a circle
+        create_circle(
+            creator,
+            string::utf8(b"Test Challenge"),
+            1_725_000_000,
+            25,
+            100_000
+        );
+        
+        accept_circle(opponent, 0, 30);
+        
+        // Step 5: Try to resolve with wrong signer (should fail)
+        resolve_circle(creator, 0, signer::address_of(creator)); // Using creator instead of AI signer
+        
+        // Clean up
+        coin::destroy_burn_cap(burn_cap);
+        coin::destroy_mint_cap(mint_cap);
+    }
+
+    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr, creator = @0x100)]
+    public fun test_get_supporter_max_alloc_amount_logic(
+        aptos_framework: &signer, 
+        supercircle_account: &signer, 
+        creator: &signer
+    ) acquires CircleBook {
+        // Step 1: Initialize the coin framework for testing
+        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
+        
+        // Step 2: Initialize our module
+        init(supercircle_account);
+        
+        // Step 3: Register creator for APT and give coins
+        coin::register<AptosCoin>(creator);
+        let creator_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(creator), creator_coins);
+        
+        // Step 4: Create a circle with 40% supporter allocation
+        create_circle(
+            creator,
+            string::utf8(b"Test Challenge"),
+            1_725_000_000,
+            40,
+            100_000
+        );
+        
+        // Step 5: Test creator side max allocation
+        let max_alloc = get_supporter_max_alloc_amount(0, 0);
+        assert!(max_alloc == 40_000, 21); // 40% of 100_000
+        
+        // Clean up
+        coin::destroy_burn_cap(burn_cap);
+        coin::destroy_mint_cap(mint_cap);
+    }
+
+    #[test(aptos_framework = @0x1, supercircle_account = @supercircle_addr, creator = @0x100, opponent = @0x200, supporter = @0x300)]
+    public fun test_get_remaining_eligible_supporter_stake_amount_logic(
+        aptos_framework: &signer, 
+        supercircle_account: &signer, 
+        creator: &signer, 
+        opponent: &signer,
+        supporter: &signer
+    ) acquires CircleBook {
+        // Step 1: Initialize the coin framework for testing
+        let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(aptos_framework);
+        
+        // Step 2: Initialize our module
+        init(supercircle_account);
+        
+        // Step 3: Register accounts for APT and give them coins
+        coin::register<AptosCoin>(creator);
+        coin::register<AptosCoin>(opponent);
+        coin::register<AptosCoin>(supporter);
+        
+        let creator_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(creator), creator_coins);
+        
+        let opponent_coins = coin::mint<AptosCoin>(100_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(opponent), opponent_coins);
+        
+        let supporter_coins = coin::mint<AptosCoin>(50_000, &mint_cap);
+        coin::deposit<AptosCoin>(signer::address_of(supporter), supporter_coins);
+        
+        // Step 4: Create and accept circle with 50% supporter allocation
+        create_circle(
+            creator,
+            string::utf8(b"Test Challenge"),
+            1_725_000_000,
+            50,
+            100_000
+        );
+        
+        accept_circle(opponent, 0, 50);
+        
+        // Step 5: Initially, full allocation should be available
+        let remaining = get_remaining_eligible_supporter_stake_amount(0, 0);
+        assert!(remaining == 50_000, 22); // 50% of 100_000
+        
+        // Step 6: Add a supporter with 20_000
+        join_as_supporter(supporter, 0, 0, 20_000);
+        
+        // Step 7: Now remaining should be reduced
+        let remaining_after = get_remaining_eligible_supporter_stake_amount(0, 0);
+        assert!(remaining_after == 30_000, 23); // 50_000 - 20_000
+        
+        // Clean up
+        coin::destroy_burn_cap(burn_cap);
+        coin::destroy_mint_cap(mint_cap);
+    }
 }
