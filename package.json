@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "init-contract": "tsx scripts/init-contract.ts",
+    "debug-contract": "tsx scripts/debug-contract.ts"
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "^3.1.2",
@@ -34,9 +36,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.5",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "tailwindcss": "^4",
+    "tsx": "^4.19.2",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5"
   }

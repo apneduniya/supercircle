@@ -23,6 +23,7 @@ import {
   Copy,
   LogOut,
   User,
+  Wallet,
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { WalletService } from "@/services/wallet";
+import { NETWORK } from "@/data/constant";
+
 
 export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
   const { account, connected, disconnect, wallet } = useWallet();
@@ -62,6 +66,18 @@ export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
     }
   }, [account?.address, toast]);
 
+  const fundWallet = useCallback(async () => {
+    if (!account?.address) return;
+
+    const walletService = new WalletService(account.address.toString());
+    try {
+      await walletService.fundWallet(1);
+      toast.success("Funded wallet with 1 APT.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to fund wallet.");
+    }
+  }, [account?.address]);
+
   return connected ? (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -75,6 +91,13 @@ export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
         <DropdownMenuItem onSelect={copyAddress} className="gap-2">
           <Copy className="h-4 w-4" /> Copy address
         </DropdownMenuItem>
+        {
+          wallet && isAptosConnectWallet(wallet) && NETWORK === "devnet" && (
+            <DropdownMenuItem onSelect={fundWallet} className="gap-2">
+              <Wallet className="h-4 w-4" /> Fund Wallet with 1 APT
+            </DropdownMenuItem>
+          )
+        }
         {wallet && isAptosConnectWallet(wallet) && (
           <DropdownMenuItem asChild>
             <a
@@ -87,6 +110,13 @@ export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
             </a>
           </DropdownMenuItem>
         )}
+        {
+          wallet && isAptosConnectWallet(wallet) && (
+            <DropdownMenuItem disabled className="gap-2">
+              On {NETWORK}
+            </DropdownMenuItem>
+          )
+        }
         <DropdownMenuItem onSelect={disconnect} className="gap-2">
           <LogOut className="h-4 w-4" /> Disconnect
         </DropdownMenuItem>

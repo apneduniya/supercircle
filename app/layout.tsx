@@ -7,6 +7,7 @@ import { constructMetaData } from "@/utils/create-metadata";
 
 import Header from "@/components/layout/header";
 import { Providers } from "@/providers";
+import { Toaster } from "sonner";
 // import BottomNavbar from "@/components/layout/bottom-navbar";
 
 
@@ -35,6 +36,7 @@ export default function RootLayout({
             <main className="py-24 px-5 h-full min-h-dvh w-full">
               {children}
             </main>
+            <Toaster />
             {/* <BottomNavbar /> */}
           </div>
         </Providers>
