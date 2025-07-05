@@ -1,0 +1,11 @@
+[package]
+name = "supercircle"
+version = "0.0.1"
+ 
+[addresses]
+supercircle_addr = "0xe785839a55cce9612dba46ac0394ef21a4ed232152e9a1a8679166073e0adf02"
+ 
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "devnet"
+subdir = "aptos-framework"
