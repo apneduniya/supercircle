@@ -249,8 +249,8 @@ function ChallengeDetailsContent() {
                         <div><b>Created At:</b> {contractService.formatTimestamp(circle.created_at)} ({contractService.getTimeAgo(circle.created_at)})</div>
                         <div><b>Deadline:</b> {contractService.formatTimestamp(circle.deadline)} ({contractService.futureTimeString(circle.deadline)})</div>
                         <div><b>Prize Pool:</b> {circle.prize_pool} APT</div>
-                        <div><b>Creator:</b> <span className="font-mono break-all">{circle.creator}</span></div>
-                        <div><b>Opponent:</b> {circle.opponent ? <span className="font-mono break-all">{circle.opponent}</span> : <span className="italic text-gray-400">Yet to join</span>}</div>
+                        <div><b>Creator:</b> <span className={`font-mono break-all ${circle.resolved && circle.winner === circle.creator ? "text-green-600" : "text-red-600"}`}>{circle.creator}</span></div>
+                        <div><b>Opponent:</b> {circle.opponent ? <span className={`font-mono break-all ${circle.resolved && circle.winner === circle.opponent ? "text-green-600" : "text-red-600"}`}>{circle.opponent}</span> : <span className="italic text-gray-400">Yet to join</span>}</div>
                         <div><b>Creator Stake:</b> {circle.creator_stake} APT</div>
                         <div><b>Opponent Stake:</b> {circle.opponent_stake} APT</div>
                         <div><b>Creator Supporter:</b> {circle.creator_supporter_pct}%</div>
