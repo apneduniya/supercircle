@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { timeStampToDateTime, isDeadlinePassed } from "@/utils/timestamp";
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { AlertCircleIcon } from "lucide-react";
+import Link from "next/link";
 
 
 // Challenge Card Component
@@ -23,7 +24,7 @@ export function ChallengeCard({ challenge, isLive = false }: ChallengeCardProps)
     return (
         <Card key={challenge.id} className={`${cardClassName} w-full`}>
             <CardHeader>
-                <CardTitle>{challenge.description}</CardTitle>
+                <CardTitle>{challenge.description.length > 40 ? challenge.description.slice(0, 40) + "..." : challenge.description}</CardTitle>
                 <CardDescription>{timeStampToDateTime(challenge.deadline)}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -74,7 +75,9 @@ export default function LiveChallenges() {
                             Live Challenges
                         </h1>
                         {liveChallenges.map((challenge) => (
-                            <ChallengeCard key={challenge.id} challenge={challenge} isLive={true} />
+                            <Link href={`/create/challenge/details?challenge=${challenge.description}`} key={challenge.id}>
+                                <ChallengeCard key={challenge.id} challenge={challenge} isLive={true} />
+                            </Link>
                         ))}
                     </div>
                 )
@@ -100,7 +103,9 @@ export default function LiveChallenges() {
                             Past Challenges
                         </h1>
                         {pastChallenges.map((challenge) => (
-                            <ChallengeCard key={challenge.id} challenge={challenge} isLive={false} />
+                            <Link href={`/create/challenge/details?challenge=${challenge.description}`} key={challenge.id}>
+                                <ChallengeCard key={challenge.id} challenge={challenge} isLive={false} />
+                            </Link>
                         ))}
                     </div>
                 )

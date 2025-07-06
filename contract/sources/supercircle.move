@@ -403,6 +403,7 @@ module supercircle_addr::SuperCircle_02 {
     }
 
     /// Get the maximum amount of stake that a supporter can allocate to a side
+    #[view]
     public fun get_supporter_max_alloc_amount(
         circle_id: u64,
         side: u8, // 0 = creator, 1 = opponent
@@ -434,6 +435,7 @@ module supercircle_addr::SuperCircle_02 {
     }
 
     /// Get the remaining eligible supporter stake amount for a side
+    #[view]
     public fun get_remaining_eligible_supporter_stake_amount(
         circle_id: u64,
         side: u8, // 0 = creator, 1 = opponent
@@ -458,12 +460,118 @@ module supercircle_addr::SuperCircle_02 {
     }
 
     /// Check if the deadline has passed for a circle
+    #[view]
     public fun is_deadline_passed(circle_id: u64): bool acquires CircleBook {
         let circle_book = borrow_global<CircleBook>(@supercircle_addr);
         let circle = vector::borrow(&circle_book.circles, circle_id);
 
         let now = timestamp::now_seconds();
         now > circle.deadline
+    }
+
+    /// Get circle id by description (exact matching)
+    /// Returns the circle ID if found, otherwise returns u64::MAX to indicate not found
+    /// This avoids confusion with actual circle ID 0
+    /// Note: Uses exact string matching as Move stdlib doesn't have case-insensitive functions
+    #[view]
+    public fun get_circle_id_by_description(description: string::String): u64 acquires CircleBook {
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        let i = 0;
+        let len = vector::length(&circle_book.circles);
+
+        while (i < len) {
+            let circle = vector::borrow(&circle_book.circles, i);
+            
+            if (circle.description == description) {
+                return circle.id
+            };
+            i = i + 1;
+        };
+
+        // Return u64::MAX (18446744073709551615) to indicate not found
+        // This avoids confusion with actual circle ID 0
+        18446744073709551615u64
+    }
+
+    /// Check if a circle ID is valid (not the "not found" sentinel value)
+    #[view]
+    public fun is_valid_circle_id(circle_id: u64): bool {
+        circle_id != 18446744073709551615u64
+    }
+
+    /// Get total number of circles in the CircleBook
+    #[view]
+    public fun get_total_circles_count(): u64 acquires CircleBook {
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        vector::length(&circle_book.circles)
+    }
+
+    /// Check if a circle exists by ID
+    #[view]
+    public fun circle_exists(circle_id: u64): bool acquires CircleBook {
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        let len = vector::length(&circle_book.circles);
+        
+        let i = 0;
+        while (i < len) {
+            let circle = vector::borrow(&circle_book.circles, i);
+            if (circle.id == circle_id) {
+                return true
+            };
+            i = i + 1;
+        };
+        false
+    }
+
+    /// Get circle status by ID
+    #[view]
+    public fun get_circle_status(circle_id: u64): u8 acquires CircleBook {
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        let len = vector::length(&circle_book.circles);
+        
+        let i = 0;
+        while (i < len) {
+            let circle = vector::borrow(&circle_book.circles, i);
+            if (circle.id == circle_id) {
+                return circle.status
+            };
+            i = i + 1;
+        };
+        255u8 // Return invalid status if not found
+    }
+
+    /// Get circle creator by ID
+    #[view]
+    public fun get_circle_creator(circle_id: u64): address acquires CircleBook {
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        let len = vector::length(&circle_book.circles);
+        
+        let i = 0;
+        while (i < len) {
+            let circle = vector::borrow(&circle_book.circles, i);
+            if (circle.id == circle_id) {
+                return circle.creator
+            };
+            i = i + 1;
+        };
+        abort ERR_CIRCLE_NOT_FOUND
+    }
+
+    /// Check if an address is the creator of a circle
+    #[view]
+    public fun is_circle_creator(circle_id: u64, addr: address): bool acquires CircleBook {
+        let circle_book = borrow_global<CircleBook>(@supercircle_addr);
+        let len = vector::length(&circle_book.circles);
+        
+        let i = 0;
+        while (i < len) {
+            let circle = vector::borrow(&circle_book.circles, i);
+            if (circle.id == circle_id) {
+                return circle.creator == addr
+            };
+            i = i + 1;
+        };
+        false
     }
 
     // ================================= Unit Tests ================================== //
