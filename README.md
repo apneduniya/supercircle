@@ -7,9 +7,9 @@
 Coming soon...
 
 ## 📦 Contract Details
-Wallet Address: 0xe785839a55cce9612dba46ac0394ef21a4ed232152e9a1a8679166073e0adf02
-Transaction link: https://explorer.aptoslabs.com/txn/0x5b725bef84c3af85cc850d107c88bdf7ae884e044a0ce28af2b4eb0ad858d551?network=testnet
-Transaction hash: 0x5b725bef84c3af85cc850d107c88bdf7ae884e044a0ce28af2b4eb0ad858d551
+- **Wallet Address**: 0xe785839a55cce9612dba46ac0394ef21a4ed232152e9a1a8679166073e0adf02
+- **Transaction link**: https://explorer.aptoslabs.com/txn/0x5b725bef84c3af85cc850d107c88bdf7ae884e044a0ce28af2b4eb0ad858d551?network=testnet
+- **Transaction hash**: 0x5b725bef84c3af85cc850d107c88bdf7ae884e044a0ce28af2b4eb0ad858d551
 
 ## 📙 Features
 - 🧠 **AI-Powered Challenge Resolution**: Automatically determines the winner of each challenge based on pre-defined criteria and real-world data.
