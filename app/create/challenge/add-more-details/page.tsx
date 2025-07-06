@@ -66,11 +66,19 @@ function AddMoreDetailsContent() {
             }
 
             const deadline = calculateDeadline();
+            const finalSupporterPercentage = isSupporterFeature ? (supporterPercentage || 0) : 0;
+
+            console.log("Transaction arguments:", {
+                challenge: challenge || "",
+                deadline: deadline || 0,
+                supporterPercentage: finalSupporterPercentage,
+                reward: Number(reward)
+            });
 
             const transaction = contractService.createCircleTransaction(
                 challenge || "",
                 deadline || 0,
-                isSupporterFeature ? supporterPercentage : 0,
+                finalSupporterPercentage,
                 Number(reward)
             );
 
@@ -162,7 +170,7 @@ function AddMoreDetailsContent() {
                                 <div className="flex flex-col gap-2">
                                     <h1 className="text-lg font-bold">Supporter Percentage</h1>
                                     <div className="flex gap-2 items-center justify-between">
-                                        <Input type="number" value={supporterPercentage} onChange={(e) => setSupporterPercentage(Number(e.target.value))} />
+                                        <Input type="number" value={supporterPercentage} onChange={(e) => setSupporterPercentage(Number(e.target.value) || 0)} />
                                         <p className="text-lg font-bold">%</p>
                                     </div>
                                 </div>

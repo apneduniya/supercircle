@@ -91,13 +91,24 @@ export class ContractService {
     ): InputTransactionData {
         const prizePoolInOcta = Math.floor(prizePoolInApt * APT_TO_OCTA);
 
+        // Validate and ensure creatorSupporterPct is a valid number
+        const validSupporterPct = Math.max(0, Math.min(100, Math.floor(creatorSupporterPct || 0)));
+        
+        console.log("Creating circle transaction with:", {
+            description: description.toLowerCase(),
+            deadline,
+            creatorSupporterPct: validSupporterPct,
+            prizePoolInOcta
+        });
+        console.log( new U8(validSupporterPct))
+
         const payload: InputTransactionData = {
             data: {
                 function: `${this.moduleAddress}::${this.moduleName}::${SuperCircleMethods.CREATE_CIRCLE}`,
                 functionArguments: [
                     new MoveString(description.toLowerCase()),
                     new U64(deadline),
-                    new U8(creatorSupporterPct),
+                    new U8(validSupporterPct).value,
                     new U64(prizePoolInOcta)
                 ]
             }
@@ -118,7 +129,7 @@ export class ContractService {
                 function: `${this.moduleAddress}::${this.moduleName}::${SuperCircleMethods.ACCEPT_CIRCLE}`,
                 functionArguments: [
                     new U64(circleId),
-                    new U8(opponentSupporterPct)
+                    new U8(opponentSupporterPct).value
                 ]
             }
         };
@@ -141,7 +152,7 @@ export class ContractService {
                 function: `${this.moduleAddress}::${this.moduleName}::${SuperCircleMethods.JOIN_AS_SUPPORTER}`,
                 functionArguments: [
                 new U64(circleId),
-                new U8(side),
+                new U8(side).value,
                 new U64(amountInOcta)
                 ]
             }
@@ -195,7 +206,7 @@ export class ContractService {
                 function: `${this.moduleAddress}::${this.moduleName}::${SuperCircleMethods.GET_SUPPORTER_MAX_ALLOC_AMOUNT}`,
                 functionArguments: [
                     new U64(circleId),
-                    new U8(side)
+                    new U8(side).value
                 ]
             }
         });
@@ -212,7 +223,7 @@ export class ContractService {
                 function: `${this.moduleAddress}::${this.moduleName}::${SuperCircleMethods.GET_REMAINING_ELIGIBLE_SUPPORTER_STAKE_AMOUNT}`,
                 functionArguments: [
                     new U64(circleId),
-                    new U8(side)
+                    new U8(side).value
                 ]
             }
         });
