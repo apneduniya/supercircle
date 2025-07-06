@@ -21,7 +21,7 @@
 - 📅 **Time-Bound Competitions**: Set deadlines to keep challenges focused, goal-driven, and efficient.
 - 🔗 **Seamless Integrations**: Connect with platforms like GitHub, Google Drive, and more to verify challenge outcomes effortlessly.
 
-## 🤔 Why I used EduChain?
+## 🤔 Why I used Aptos?
 We chose Aptos for lightning‑fast finality, and low, predictable fees—so challenges settle instantly and securely. Its robust docs, SDKs, MCPs and active orgainers of the hackathon venue let us build and scale Supercircle with confidence.
 
 **Building the trusted challenge layer on Aptos**
