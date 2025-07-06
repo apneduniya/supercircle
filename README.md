@@ -3,8 +3,8 @@
 <p align="center">A platform for creating stake‑backed friendly challenges with automatic settlement</p>
 
 ## 🎥 DEMO
+[![demo video](https://i.vimeocdn.com/video/2033923820-702118e9797431529941927a53584eadad8e9a9d74cdb620098885eea6653a55-d?mw=3600&mh=1985&q=70)](https://vimeo.com/1099088773?share=copy)
 
-Coming soon...
 
 ## 📦 Project and Contract Details
 - **Wallet Address**: 0xe785839a55cce9612dba46ac0394ef21a4ed232152e9a1a8679166073e0adf02
