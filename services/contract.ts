@@ -244,6 +244,7 @@ export class ContractService {
      * since Move stdlib doesn't support string case conversion
      */
     async getCircleIdByDescription(description: string): Promise<number> {
+        console.log("Searching for description:", description.toLowerCase());
         const result = await this.aptos.view({
             payload: {
                 function: `${this.moduleAddress}::${this.moduleName}::${SuperCircleMethods.GET_CIRCLE_ID_BY_DESCRIPTION}`,
@@ -253,7 +254,10 @@ export class ContractService {
             }
         });
 
-        return parseInt(result[0] as string);
+        console.log("Raw result from getCircleIdByDescription:", result);
+        const circleId = parseInt(result[0] as string);
+        console.log("Parsed circle ID:", circleId);
+        return circleId;
     }
 
     /**
@@ -280,11 +284,17 @@ export class ContractService {
      */
     async findCircleByDescription(description: string): Promise<Circle | null> {
         try {
+            console.log("Finding circle by description:", description);
             const circleId = await this.getCircleIdByDescription(description);
+            console.log("Found circle ID:", circleId);
+            
             const isValid = await this.isValidCircleId(circleId);
+            console.log("Circle ID is valid:", isValid);
             
             if (isValid) {
-                return await this.getCircleById(circleId);
+                const circle = await this.getCircleById(circleId);
+                console.log("Found circle:", circle);
+                return circle;
             }
             return null;
         } catch (error) {
@@ -439,30 +449,41 @@ export class ContractService {
                 return [];
             }
 
-            return circles.map((circle: any) => ({
-                id: parseInt(circle.id),
-                creator: circle.creator,
-                opponent: circle.opponent && circle.opponent.vec && circle.opponent.vec.length > 0 ? circle.opponent.vec[0] : null,
-                description: circle.description,
-                deadline: parseInt(circle.deadline),
-                created_at: parseInt(circle.created_at),
-                creator_stake: parseInt(circle.creator_stake) / APT_TO_OCTA,
-                opponent_stake: parseInt(circle.opponent_stake) / APT_TO_OCTA,
-                creator_supporter_pct: parseInt(circle.creator_supporter_pct),
-                opponent_supporter_pct: parseInt(circle.opponent_supporter_pct),
-                creator_supporters: (circle.creator_supporters || []).map((s: any) => ({
-                    addr: s.addr,
-                    amount: parseInt(s.amount) / APT_TO_OCTA
-                })),
-                opponent_supporters: (circle.opponent_supporters || []).map((s: any) => ({
-                    addr: s.addr,
-                    amount: parseInt(s.amount) / APT_TO_OCTA
-                })),
-                resolved: circle.resolved,
-                winner: circle.winner && circle.winner.vec && circle.winner.vec.length > 0 ? circle.winner.vec[0] : null,
-                status: parseInt(circle.status),
-                prize_pool: parseInt(circle.prize_pool) / APT_TO_OCTA
-            }));
+            return circles.map((circle: any) => {
+                // Validate and parse ID
+                const parsedId = parseInt(circle.id);
+                if (isNaN(parsedId) || parsedId < 0) {
+                    console.error("Invalid circle ID found:", circle.id);
+                    throw new Error(`Invalid circle ID: ${circle.id}`);
+                }
+
+                return {
+                    id: parsedId,
+                    creator: circle.creator,
+                    opponent: circle.opponent && circle.opponent.vec && circle.opponent.vec.length > 0 ? circle.opponent.vec[0] : null,
+                    description: circle.description,
+                    deadline: parseInt(circle.deadline),
+                    created_at: parseInt(circle.created_at),
+                    creator_stake: parseInt(circle.creator_stake) / APT_TO_OCTA,
+                    opponent_stake: parseInt(circle.opponent_stake) / APT_TO_OCTA,
+                    creator_supporter_pct: parseInt(circle.creator_supporter_pct),
+                    opponent_supporter_pct: parseInt(circle.opponent_supporter_pct),
+                    creator_supporters: (circle.creator_supporters || []).map((s: any) => ({
+                        addr: s.addr,
+                        amount: parseInt(s.amount) / APT_TO_OCTA,
+                        joined_at: s.joined_at ? parseInt(s.joined_at) : 0
+                    })),
+                    opponent_supporters: (circle.opponent_supporters || []).map((s: any) => ({
+                        addr: s.addr,
+                        amount: parseInt(s.amount) / APT_TO_OCTA,
+                        joined_at: s.joined_at ? parseInt(s.joined_at) : 0
+                    })),
+                    resolved: circle.resolved,
+                    winner: circle.winner && circle.winner.vec && circle.winner.vec.length > 0 ? circle.winner.vec[0] : null,
+                    status: parseInt(circle.status),
+                    prize_pool: parseInt(circle.prize_pool) / APT_TO_OCTA
+                };
+            });
         } catch (error) {
             console.error("Error getting all circles:", error);
             console.error("Error details:", error);

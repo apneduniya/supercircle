@@ -22,9 +22,11 @@ export function ChallengeCard({ challenge, isLive = false }: ChallengeCardProps)
         : "bg-gray-50 mb-4";
 
     return (
-        <Card key={challenge.id} className={`${cardClassName} w-full`}>
+        <Card key={challenge.id} className={`${cardClassName} w-full cursor-pointer`}>
             <CardHeader>
-                <CardTitle>{challenge.description.length > 40 ? challenge.description.slice(0, 40) + "..." : challenge.description}</CardTitle>
+                <CardTitle className="break-words">
+                    {challenge.description.length > 35 ? challenge.description.slice(0, 35) + "..." : challenge.description}
+                </CardTitle>
                 <CardDescription>{timeStampToDateTime(challenge.deadline)}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -58,8 +60,10 @@ export default function LiveChallenges() {
     useEffect(() => {
         const fetchChallenges = async () => {
             const challenges = await contractService.getAllCircles();
-            setLiveChallenges(challenges.filter(challenge => !challenge.resolved && !isDeadlinePassed(challenge.deadline)));
-            setPastChallenges(challenges.filter(challenge => challenge.resolved || isDeadlinePassed(challenge.deadline)));
+            const reversedChallenges = challenges.reverse();
+
+            setLiveChallenges(reversedChallenges.filter(challenge => !challenge.resolved && !isDeadlinePassed(challenge.deadline)));
+            setPastChallenges(reversedChallenges.filter(challenge => challenge.resolved || isDeadlinePassed(challenge.deadline)));
         }
 
         fetchChallenges();
