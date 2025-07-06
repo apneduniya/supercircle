@@ -1,55 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<h1 align="center">SuperCircle 🔥</h1>
 
-## Getting Started
+<p align="center">A platform for creating stake‑backed friendly challenges with automatic settlement</p>
 
-First, run the development server:
+## 🎥 DEMO
+
+Coming soon...
+
+## 📙 Features
+- 🧠 **AI-Powered Challenge Resolution**: Automatically determines the winner of each challenge based on pre-defined criteria and real-world data.
+- ⚔️ **Stake-Backed Friendly Challenges**: Create meaningful competitions with real money or rewards at stake—no need for manual judgment.
+- 👥 **Peer Endorsements**: Allow friends to support participants with a share of the winnings, adding social validation and engagement.
+- 💸 **Smart Payout System**: Distributes rewards automatically and fairly to winners and their endorsers; offers partial loss protection to losers backed by friends.
+- 📅 **Time-Bound Competitions**: Set deadlines to keep challenges focused, goal-driven, and efficient.
+- 🔗 **Seamless Integrations**: Connect with platforms like GitHub, Google Drive, and more to verify challenge outcomes effortlessly.
+
+## 🤔 Why I used EduChain?
+We chose Aptos for lightning‑fast finality, and low, predictable fees—so challenges settle instantly and securely. Its robust docs, SDKs, MCPs and active orgainers of the hackathon venue let us build and scale Supercircle with confidence.
+
+**Building the trusted challenge layer on Aptos**
+
+## 🤗 Contributing
+1. Fork the repository.
+2. Create a new branch: `git checkout -b feature-name`.
+3. Make your changes.
+4. Push your branch: `git push origin feature-name`.
+5. Create a pull request.
+
+## ✍ Acknowledgments
+This project couldn't be there if they didn't be there!
+- [Aptos](https://aptos.dev/)
+- [Petra](https://petra.app/)
+- [Composio](https://composio.dev/)
+- [Aptos Hackathon](https://lu.ma/ct5ghfi3?locale=en-IN)
+
+Even something was gone wrong while making this project but hackathon orgainser team helped me to over come the issues and I am really thankful to it!
+
+## 🚀 Getting Started
+
+Follow these steps to set up and run SuperCircle:
+
+1. **Clone the repository**
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/apneduniya/supercircle.git
+cd supercircle
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+bun install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## SuperCircle Contract Setup
-
-### Prerequisites
-
-Before using the SuperCircle app, you need to initialize the smart contract. This is a **one-time setup** that must be done by the contract deployer.
-
-### 1. Install Dependencies
+If you plan to use contract scripts, you may also need:
 
 ```bash
 npm install
 ```
 
-### 2. Environment Setup
+3. **Set up environment variables**
 
-Create a `.env` file in the root directory with the following variables:
+Copy the example environment file and fill in the required values:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` and set the following variables:
 
 ```env
 # Aptos Contract Configuration
@@ -64,11 +81,11 @@ NEXT_PUBLIC_AI_SIGNER_ADDRESS=
 DEPLOYER_PRIVATE_KEY=0x1234567890abcdef...
 ```
 
-**Important**: Replace `DEPLOYER_PRIVATE_KEY` with the private key of the account that deployed the contract.
+**Important:** Replace `DEPLOYER_PRIVATE_KEY` with the private key of the account that deployed the contract.
 
-### 3. Initialize the Contract
+4. **Initialize the contract (one-time setup, deployer only)**
 
-Run the initialization script **once**:
+Run the initialization script:
 
 ```bash
 npm run init-contract
@@ -81,7 +98,7 @@ This script will:
 - 🔗 Provide transaction link
 - ✅ Verify successful initialization
 
-### 4. Script Output
+Example output:
 
 ```bash
 🔧 SuperCircle Contract Initialization Script
@@ -101,21 +118,25 @@ This script will:
 🎉 Initialization completed successfully!
 ```
 
-### 5. Troubleshooting
+**Troubleshooting:**
+- "Contract is already initialized!" — This is normal if the contract is already set up.
+- "Invalid private key in environment variable" — Check that your `DEPLOYER_PRIVATE_KEY` is correct and starts with `0x`.
+- "Low balance! Make sure you have enough APT for gas fees" — Add some APT to your deployer account.
+- "Generated account address doesn't match MODULE_ADDRESS" — Make sure you're using the correct deployer private key.
 
-**Error: "Contract is already initialized!"**
-- ✅ This is normal - the contract is already set up and ready to use.
+5. **Run the development server**
 
-**Error: "Invalid private key in environment variable"**
-- ❌ Check that your `DEPLOYER_PRIVATE_KEY` is correct and starts with `0x`
+```bash
+bun dev
+```
 
-**Error: "Low balance! Make sure you have enough APT for gas fees"**
-- ❌ Add some APT to your deployer account for gas fees
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-**Error: "Generated account address doesn't match MODULE_ADDRESS"**
-- ❌ Make sure you're using the correct deployer private key
+6. **Set up the judge cron job**
 
-### 6. After Initialization
+Set up a cron job to ping [https://supercircle.vercel.app/api/judge](https://supercircle.vercel.app/api/judge) every minute to check for new challenges and resolve them.
+
+---
 
 Once initialized, users can:
 - 🎯 Create challenges/circles
@@ -124,3 +145,16 @@ Once initialized, users can:
 - 🏆 Resolve circles (AI signer only)
 
 The contract is now ready for use! 🎉
+
+## 📚 Learn More
+
+- [Aptos Documentation](https://aptos.dev/docs) - learn about Aptos features and API.
+- [Aptos Hackathon](https://lu.ma/ct5ghfi3?locale=en-IN) - learn about Aptos hackathon.
+- [Aptos Move](https://aptos.dev/move) - learn about Aptos Move.
+
+## 🛳️ Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
