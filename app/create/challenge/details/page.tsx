@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { ContractService, Circle, Supporter } from "@/services/contract";
 import { toast } from "sonner";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
@@ -14,8 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 
-
-export default function ChallengeDetailsPage() {
+function ChallengeDetailsContent() {
     const { account, signAndSubmitTransaction } = useWallet();
     const router = useRouter();
 
@@ -318,6 +317,14 @@ export default function ChallengeDetailsPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function ChallengeDetailsPage() {
+    return (
+        <Suspense fallback={<div className="text-center py-10">Loading...</div>}>
+            <ChallengeDetailsContent />
+        </Suspense>
     );
 }
 

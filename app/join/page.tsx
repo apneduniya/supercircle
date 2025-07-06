@@ -5,11 +5,10 @@ import { Input } from "@/components/ui/input";
 import { ContractService } from "@/services/contract";
 import { ArrowRightIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { toast } from "sonner";
 
-
-export default function JoinPage() {
+function JoinContent() {
     const searchParams = useSearchParams();
     const role = searchParams.get("role") || "opponent";
     const [circleId, setCircleId] = useState<number>(0);
@@ -35,17 +34,23 @@ export default function JoinPage() {
     }
 
     return (
-        <>
-            <div className="flex flex-col gap-4 w-full">
-                <h1 className="text-2xl font-bold w-full text-center">Join Circle as a {role?.charAt(0).toUpperCase() + role?.slice(1)}</h1>
-                <div className="flex flex-col gap-4 w-full mt-8">
-                    <Input type="number" placeholder="Enter Circle ID" value={circleId} onChange={(e) => setCircleId(Number(e.target.value))} className="w-full h-14" />
-                    <Button onClick={handleJoin} className="bg-[var(--supercircle-red)] text-white py-7 font-bold rounded-md w-full mt-5">
-                        Join <ArrowRightIcon className="w-6 h-6" />
-                    </Button>
-                </div>
+        <div className="flex flex-col gap-4 w-full">
+            <h1 className="text-2xl font-bold w-full text-center">Join Circle as a {role?.charAt(0).toUpperCase() + role?.slice(1)}</h1>
+            <div className="flex flex-col gap-4 w-full mt-8">
+                <Input type="number" placeholder="Enter Circle ID" value={circleId} onChange={(e) => setCircleId(Number(e.target.value))} className="w-full h-14" />
+                <Button onClick={handleJoin} className="bg-[var(--supercircle-red)] text-white py-7 font-bold rounded-md w-full mt-5">
+                    Join <ArrowRightIcon className="w-6 h-6" />
+                </Button>
             </div>
-        </>
-    )
+        </div>
+    );
+}
+
+export default function JoinPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <JoinContent />
+        </Suspense>
+    );
 }
 

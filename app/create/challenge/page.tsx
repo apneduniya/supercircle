@@ -4,15 +4,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 // import { useWallet } from "@aptos-labs/wallet-adapter-react";
 // import { Aptos, AptosConfig } from "@aptos-labs/ts-sdk";
 // import { APTOS_NETWORK } from "@/data/constant";
 // import { toast } from "sonner";
 import { ArrowRightIcon } from "lucide-react";
 
-
-export default function ChallengePage() {
+function ChallengeContent() {
     // const { account, signAndSubmitTransaction } = useWallet();
     const searchParams = useSearchParams();
     const challenge = searchParams.get("challenge") || "";
@@ -63,19 +62,25 @@ export default function ChallengePage() {
     }
 
     return (
-        <>
-            <div className="flex flex-col gap-4 w-full">
-                <h1 className="text-2xl font-bold w-full text-center">What is the reward (prize) amount?</h1>
-                <div className="flex flex-col gap-4 w-full mt-8">
-                    <div className="flex gap-2 w-full items-center">
-                        <Input type="number" placeholder="0" value={reward} onChange={(e) => setReward(e.target.value)} className="w-full h-14 border-none text-4xl placeholder:text-4xl text-center shadow-none" />
-                        <p className="text-4xl text-gray-500 font-bold">APT</p>
-                    </div>
-                    <Button className="bg-[var(--supercircle-red)] text-white py-7 font-bold rounded-md w-full mt-5" onClick={handleNext}>
-                        Last Step <ArrowRightIcon className="w-4 h-4" />
-                    </Button>
+        <div className="flex flex-col gap-4 w-full">
+            <h1 className="text-2xl font-bold w-full text-center">What is the reward (prize) amount?</h1>
+            <div className="flex flex-col gap-4 w-full mt-8">
+                <div className="flex gap-2 w-full items-center">
+                    <Input type="number" placeholder="0" value={reward} onChange={(e) => setReward(e.target.value)} className="w-full h-14 border-none text-4xl placeholder:text-4xl text-center shadow-none" />
+                    <p className="text-4xl text-gray-500 font-bold">APT</p>
                 </div>
+                <Button className="bg-[var(--supercircle-red)] text-white py-7 font-bold rounded-md w-full mt-5" onClick={handleNext}>
+                    Last Step <ArrowRightIcon className="w-4 h-4" />
+                </Button>
             </div>
-        </>
-    )
+        </div>
+    );
+}
+
+export default function ChallengePage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ChallengeContent />
+        </Suspense>
+    );
 }

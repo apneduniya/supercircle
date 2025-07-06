@@ -13,9 +13,9 @@ import { APTOS_NETWORK } from "@/data/constant";
 import { toast } from "sonner";
 import { ContractService } from "@/services/contract";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
-
-export default function AddMoreDetailsPage() {
+function AddMoreDetailsContent() {
     const { account, signAndSubmitTransaction } = useWallet();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -96,88 +96,94 @@ export default function AddMoreDetailsPage() {
     }
 
     return (
-        <>
-            <div className="flex flex-col gap-4 w-full">
-                <h1 className="text-sm w-full text-center">Prize Amount</h1>
-                <h1 className="text-6xl font-bold w-full text-center mb-10">
-                    {reward} APT
-                </h1>
-                <p className="text-lg font-bold w-full text-center">
-                    {challenge}
-                </p>
-                <Card className="mt-5 w-full">
-                    <CardContent>
-                        <div className="flex flex-col gap-5 w-full">
-                            <div className="flex flex-col gap-2">
-                                <h1 className="text-lg font-bold">Deadline</h1>
-                                <div className="flex gap-2 mb-2 justify-around">
-                                    {presetDeadlines.map((preset) => (
-                                        <button
-                                            key={preset.label}
-                                            type="button"
-                                            onClick={() => {
-                                                setSelectedPreset(preset.value);
-                                                setDate(undefined);
-                                                setTime("");
-                                            }}
-                                            className={`text-sm p-4 rounded-md w-fit border transition-colors ${selectedPreset === preset.value ? "border-red-500 bg-red-100 text-red-700" : "bg-gray-100 text-gray-500 border-transparent"}`}
-                                        >
-                                            {preset.label}
-                                        </button>
-                                    ))}
+        <div className="flex flex-col gap-4 w-full">
+            <h1 className="text-sm w-full text-center">Prize Amount</h1>
+            <h1 className="text-6xl font-bold w-full text-center mb-10">
+                {reward} APT
+            </h1>
+            <p className="text-lg font-bold w-full text-center">
+                {challenge}
+            </p>
+            <Card className="mt-5 w-full">
+                <CardContent>
+                    <div className="flex flex-col gap-5 w-full">
+                        <div className="flex flex-col gap-2">
+                            <h1 className="text-lg font-bold">Deadline</h1>
+                            <div className="flex gap-2 mb-2 justify-around">
+                                {presetDeadlines.map((preset) => (
+                                    <button
+                                        key={preset.label}
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedPreset(preset.value);
+                                            setDate(undefined);
+                                            setTime("");
+                                        }}
+                                        className={`text-sm p-4 rounded-md w-fit border transition-colors ${selectedPreset === preset.value ? "border-red-500 bg-red-100 text-red-700" : "bg-gray-100 text-gray-500 border-transparent"}`}
+                                    >
+                                        {preset.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="flex gap-4 items-center justify-around">
+                                <div className="flex flex-col gap-3">
+                                    <Input
+                                        type="date"
+                                        placeholder="Select date"
+                                        value={date && !selectedPreset ? date.toISOString().slice(0, 10) : ""}
+                                        onChange={(e) => {
+                                            setDate(e.target.value ? new Date(e.target.value) : undefined);
+                                            setSelectedPreset(null);
+                                        }}
+                                        className={selectedPreset === null && date ? "border-red-500 bg-red-100 text-red-700" : ""}
+                                    />
                                 </div>
-                                <div className="flex gap-4 items-center justify-around">
-                                    <div className="flex flex-col gap-3">
-                                        <Input
-                                            type="date"
-                                            placeholder="Select date"
-                                            value={date && !selectedPreset ? date.toISOString().slice(0, 10) : ""}
-                                            onChange={(e) => {
-                                                setDate(e.target.value ? new Date(e.target.value) : undefined);
-                                                setSelectedPreset(null);
-                                            }}
-                                            className={selectedPreset === null && date ? "border-red-500 bg-red-100 text-red-700" : ""}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-3">
-                                        <Input
-                                            type="time"
-                                            id="time-picker"
-                                            step="1"
-                                            value={time && !selectedPreset ? time : ""}
-                                            onChange={(e) => {
-                                                setTime(e.target.value);
-                                                setSelectedPreset(null);
-                                            }}
-                                            className={selectedPreset === null && time ? "border-red-500 bg-red-100 text-red-700" : ""}
-                                        />
-                                    </div>
+                                <div className="flex flex-col gap-3">
+                                    <Input
+                                        type="time"
+                                        id="time-picker"
+                                        step="1"
+                                        value={time && !selectedPreset ? time : ""}
+                                        onChange={(e) => {
+                                            setTime(e.target.value);
+                                            setSelectedPreset(null);
+                                        }}
+                                        className={selectedPreset === null && time ? "border-red-500 bg-red-100 text-red-700" : ""}
+                                    />
                                 </div>
                             </div>
-                            <div className="flex gap-2 items-center justify-between">
-                                <h1 className="text-lg font-bold">Enable Supporter</h1>
-                                <Switch checked={isSupporterFeature} onCheckedChange={setIsSupporterFeature} />
-                            </div>
-                            {
-                                isSupporterFeature && (
-                                    <div className="flex flex-col gap-2">
-                                        <h1 className="text-lg font-bold">Supporter Percentage</h1>
-                                        <div className="flex gap-2 items-center justify-between">
-                                            <Input type="number" value={supporterPercentage} onChange={(e) => setSupporterPercentage(Number(e.target.value))} />
-                                            <p className="text-lg font-bold">%</p>
-                                        </div>
-                                    </div>
-                                )
-                            }
                         </div>
-                    </CardContent>
-                    <CardFooter className="mt-5">
-                        <Button className="bg-[var(--supercircle-red)] text-white py-7 font-bold rounded-md w-full" onClick={handleSignTransaction}>
-                            Sign the transaction
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </div>
-        </>
-    )
+                        <div className="flex gap-2 items-center justify-between">
+                            <h1 className="text-lg font-bold">Enable Supporter</h1>
+                            <Switch checked={isSupporterFeature} onCheckedChange={setIsSupporterFeature} />
+                        </div>
+                        {
+                            isSupporterFeature && (
+                                <div className="flex flex-col gap-2">
+                                    <h1 className="text-lg font-bold">Supporter Percentage</h1>
+                                    <div className="flex gap-2 items-center justify-between">
+                                        <Input type="number" value={supporterPercentage} onChange={(e) => setSupporterPercentage(Number(e.target.value))} />
+                                        <p className="text-lg font-bold">%</p>
+                                    </div>
+                                </div>
+                            )
+                        }
+                    </div>
+                </CardContent>
+                <CardFooter className="mt-5">
+                    <Button className="bg-[var(--supercircle-red)] text-white py-7 font-bold rounded-md w-full" onClick={handleSignTransaction}>
+                        Sign the transaction
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
+    );
+}
+
+export default function AddMoreDetailsPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <AddMoreDetailsContent />
+        </Suspense>
+    );
 }
