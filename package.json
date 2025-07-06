@@ -11,6 +11,7 @@
     "debug-contract": "tsx scripts/debug-contract.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^1.3.22",
     "@aptos-labs/ts-sdk": "^3.1.2",
     "@aptos-labs/wallet-adapter-core": "^6.0.1",
     "@aptos-labs/wallet-adapter-react": "^7.0.1",
@@ -25,17 +26,21 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.5",
     "@tanstack/react-query": "^5.81.5",
+    "ai": "^4.3.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "composio-core": "^0.5.39",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.525.0",
     "next": "15.3.4",
     "next-themes": "^0.4.6",
+    "openai": "^5.8.2",
     "react": "^19.0.0",
     "react-day-picker": "^9.8.0",
     "react-dom": "^19.0.0",
     "sonner": "^2.0.6",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^3.25.74"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
